@@ -1,8 +1,8 @@
 --Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------
---Tool Version: Vivado v.2017.4 (lin64) Build 2086221 Fri Dec 15 20:54:30 MST 2017
---Date        : Wed Mar 28 00:08:25 2018
---Host        : ubuntu running 64-bit Ubuntu 16.04.3 LTS
+--Tool Version: Vivado v.2017.4 (win64) Build 2086221 Fri Dec 15 20:55:39 MST 2017
+--Date        : Thu Jun 14 17:05:17 2018
+--Host        : MM229938-PC running 64-bit major release  (build 9200)
 --Command     : generate_target Arty_Z7_10_wrapper.bd
 --Design      : Arty_Z7_10_wrapper
 --Purpose     : IP block netlist
