@@ -11,7 +11,7 @@
 		// Width of S_AXI data bus
 		parameter integer C_S_AXI_DATA_WIDTH	= 32,
 		// Width of S_AXI address bus
-		parameter integer C_S_AXI_ADDR_WIDTH	= 4
+		parameter integer C_S_AXI_ADDR_WIDTH	= 16
 	)
 	(
 		// Users to add ports here
@@ -104,7 +104,7 @@
 	//-- Signals for user logic register space example
 	//------------------------------------------------
 	//-- Number of Slave Registers 1
-	reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg0;
+	reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg [15:0];
 	wire	 slv_reg_rden;
 	wire	 slv_reg_wren;
 	reg [C_S_AXI_DATA_WIDTH-1:0]	 reg_data_out;
@@ -212,31 +212,31 @@
 	// Slave register write enable is asserted when valid address and data are available
 	// and the slave is ready to accept the write address and write data.
 	assign slv_reg_wren = axi_wready && S_AXI_WVALID && axi_awready && S_AXI_AWVALID;
-
+    
+    integer index;
 	always @( posedge S_AXI_ACLK )
 	begin
 	  if ( S_AXI_ARESETN == 1'b0 )
 	    begin
-	      slv_reg0 <= 0;
+	      for (index = 0; index < 16; index = index + 1) 
+	      begin
+	        slv_reg[index] = 32'h0;
+	      end
 	    end 
 	  else begin
 	    if (slv_reg_wren)
         begin
-          if ( axi_awaddr == 32'h0 )    // If address is correct
+          if ( (S_AXI_WSTRB == 4'hF) && ((axi_awaddr / 4) < 16) )
           begin
-            if ( S_AXI_WSTRB == 4'hF )  // if word write is used
-              slv_reg0 <= S_AXI_WDATA;  // set to input 
-            else 
-              slv_reg0 <= 32'h0;        // else clear the value
+            slv_reg[axi_awaddr / 4] <= S_AXI_WDATA;
           end
           else 
           begin
-            slv_reg0 <= slv_reg0;       // for any other address, do nothing
+            for (index = 0; index < 16; index = index + 1) 
+            begin
+              slv_reg[index] <= slv_reg[index];
+            end
           end
-        end
-        else
-        begin
-             slv_reg0 <= slv_reg0;
         end
 	  end
 	end    
@@ -341,14 +341,14 @@
 	assign slv_reg_rden = axi_arready & S_AXI_ARVALID & ~axi_rvalid;
 	always @(*)
 	begin
-	   if (axi_araddr == 32'h0)
+	   if ( (axi_araddr / 4) < 16 )
 	   begin
-	       reg_data_out <= slv_reg0;
+	     reg_data_out <= slv_reg[axi_araddr / 4];
 	   end
 	   else
 	   begin
-	       reg_data_out <= 32'h0;
-	   end       
+	     reg_data_out <= 32'h0;
+	   end
 	end
 
 	// Output register or memory read data
